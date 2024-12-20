@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/go-playground/validator/v10"
 )
 
 type ConfigValidationError struct {
@@ -16,20 +18,20 @@ func (e ConfigValidationError) Error() string {
 }
 
 type HttpServer struct {
-	Address string `json:"address"`
+	Address string `json:"address" validate:"required"`
 }
 
 type DatabaseConfig struct {
-	User     string `json:"user"`
-	Password string `json:"password"`
-	DbName   string `json:"db_name"`
-	SslMode  string `json:"ssl_mode"`
+	User     string `json:"user" validate:"required"`
+	Password string `json:"password" validate:"required"`
+	DbName   string `json:"db_name" validate:"required"`
+	SslMode  string `json:"ssl_mode" validate:"required"`
 }
 
 type Config struct {
-	Env        string         `json:"env"`
-	HttpServer HttpServer     `json:"http_server"`
-	DbConfig   DatabaseConfig `json:"db"`
+	Env        string         `json:"env" validate:"required"`
+	HttpServer HttpServer     `json:"http_server" validate:"required"`
+	DbConfig   DatabaseConfig `json:"db" validate:"required"`
 }
 
 func ParseConfig() (*Config, error) {
@@ -55,7 +57,11 @@ func ParseConfig() (*Config, error) {
 		return nil, ConfigValidationError{Message: "Invalid environment variable"}
 	}
 
-	//TODO: валидация пустых полей через go-validator
+	validate := validator.New()
+	err = validate.Struct(cfg)
+	if err != nil {
+		return nil, ConfigValidationError{Message: err.Error()}
+	}
 
 	return &cfg, nil
 }

@@ -7,6 +7,6 @@
 		"user": "postgres",
 		"password": "root",
 		"db_name": "finance_tracker",
-		"sslmode": "disable"
+		"ssl_mode": "disable"
 	}
 }
