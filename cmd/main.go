@@ -1,11 +1,15 @@
 package main
 
 import (
+	"financeTracker/internal/routers"
 	"financeTracker/internal/storage"
 	"financeTracker/pkg/config"
 	"financeTracker/pkg/logger"
 	"log"
+	"log/slog"
+	"net/http"
 	"os"
+	"time"
 )
 
 func main() {
@@ -24,5 +28,18 @@ func main() {
 	}
 	log.Info("Database connected")
 
-	_ = s
+	r := routers.NewMainRouter(log, s)
+	server := &http.Server{
+		Addr:         cfg.HttpServer.Address,
+		Handler:      r,
+		WriteTimeout: 15 * time.Second,
+		ReadTimeout:  15 * time.Second,
+	}
+
+	log.Info("Server listens", slog.String("host", cfg.HttpServer.Address))
+	if err = server.ListenAndServe(); err != nil {
+		log.Error("Error while starting server", logger.CustomError(err))
+	}
+	log.Error("Server stopped!")
+
 }
