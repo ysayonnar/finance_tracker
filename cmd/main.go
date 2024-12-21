@@ -5,6 +5,7 @@ import (
 	"financeTracker/pkg/config"
 	"financeTracker/pkg/logger"
 	"log"
+	"os"
 )
 
 func main() {
@@ -14,11 +15,14 @@ func main() {
 	}
 
 	log := logger.NewLogger(cfg)
+	log.Info("Config parsed")
 
 	s, err := storage.NewStorage(&cfg.DbConfig)
 	if err != nil {
 		log.Error("error while connecting to db", logger.CustomError(err))
+		os.Exit(1)
 	}
+	log.Info("Database connected")
 
 	_ = s
 }
